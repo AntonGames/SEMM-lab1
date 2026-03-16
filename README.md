@@ -1,6 +1,6 @@
 # SEMM Lab 1 — TLA+ Kerberos Protocol
 
-Lab work for the Software Engineering Methods and Models (SEMM) course.
+Lab work for the Software Engineering Models and Methods (SEMM) course.
 
 - **Lab1a** — Concrete Kerberos authentication protocol specification with model checking (see [Lab1a/README.md](Lab1a/README.md))
 - **Lab1b** — Abstract specification, refinement mapping, and TLAPS proofs (see [Lab1b/README.md](Lab1b/README.md))
