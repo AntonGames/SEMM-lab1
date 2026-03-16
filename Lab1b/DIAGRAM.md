@@ -1,6 +1,21 @@
-# Lab1b: Abstraction, Refinement & TLAPS Proofs
+# Lab1b: Abstract Specification, Refinement & Proof
 
-## Overview
+## The Idea
+
+In Lab1a, we modeled the Kerberos protocol with all its details — message exchanges between client, KDC, and server, ticket validation, replay cache lookups, and unreliable network behavior.
+
+But at a higher abstraction level, the entire protocol achieves one thing: **a client transitions from unauthenticated to authenticated**. The abstract specification captures this essential behavior in a single atomic action, without any messages, tickets, or network.
+
+The core question: **does the concrete multi-step protocol correctly implement this abstract one-step behavior?** This is **refinement** — showing that every behavior of the concrete system is a valid behavior of the abstract system.
+
+## Two Abstraction Levels
+
+- **Abstract** (`KerberosAbstract.tla`): One variable `authState[c] ∈ {idle, authenticated}`, one action `Authenticate(c)`. No messages, no KDC, no network.
+- **Concrete** (`Kerberos.tla` from Lab1a): Six variables, seven actions, four message types, unreliable network with message loss.
+
+Both specifications describe the same system at different levels of detail.
+
+## How They Relate
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#000000', 'nodeTextColor': '#000000', 'clusterBkg': '#e3f2fd', 'clusterBorder': '#1565c0'}}}%%
@@ -37,7 +52,13 @@ flowchart TB
 
 ## Refinement Mapping
 
-The concrete Kerberos protocol (with messages, KDC, replay cache) **refines** the abstract specification where authentication is a single atomic step:
+The refinement mapping defines how concrete state variables map to abstract ones:
+
+```
+authState[c] == IF serverState[c] = "accepted" THEN "authenticated" ELSE "idle"
+```
+
+This single expression bridges the 6-variable concrete world to the 1-variable abstract world: a client is considered "authenticated" in the abstract sense precisely when the server has accepted them in the concrete protocol.
 
 | Concrete (Lab1a) | Abstract (Lab1b) |
 |---|---|
@@ -45,9 +66,21 @@ The concrete Kerberos protocol (with messages, KDC, replay cache) **refines** th
 | `serverState[c] = "idle"` | `authState[c] = "idle"` |
 | 6 variables, 7 actions, messages | 1 variable, 1 action, no messages |
 
-## TLAPS Proof Structure
+TLC verifies refinement by running the concrete spec and checking, at every state, that the mapped abstract variables satisfy the abstract spec's transition relation.
 
-Both proofs follow the standard inductive invariant pattern, decomposed per action:
+## TLAPS Proofs
+
+While TLC verifies properties for a finite model (e.g., 3 clients, 3 nonces), **TLAPS** provides a formal mathematical proof that holds for **arbitrary** constants. We prove two invariants:
+
+### 1. TypeOK (type invariant)
+All state variables stay within their declared domains throughout execution.
+
+### 2. AcceptRequiresTicket (security invariant)
+If `serverState[c] = "accepted"`, then `c ∈ kdcState`. The server never grants access to a client without a KDC-issued ticket.
+
+### Proof technique
+
+Both proofs use **inductive invariant reasoning**, decomposed per action:
 
 ```
 THEOREM: Spec ⟹ □Invariant
@@ -63,3 +96,15 @@ THEOREM: Spec ⟹ □Invariant
     <2>9. CASE UNCHANGED vars     — stutter step
   <1>q. QED BY <1>1, <1>2, PTL
 ```
+
+The critical case is **ServerAccept** (step `<2>5`): it sets `serverState[c] = "accepted"` but only when `msg.src ∈ kdcState` — so the invariant is preserved by construction.
+
+## Files
+
+| File | Purpose |
+|---|---|
+| `KerberosAbstract.tla` | Abstract spec — one variable, one action |
+| `KerberosAbstract.cfg` | TLC config for abstract spec |
+| `KerberosRefinement.tla` | Refinement mapping + TLAPS proofs of TypeOK and AcceptRequiresTicket |
+| `KerberosRefinement.cfg` | TLC config for refinement checking |
+| `Kerberos.tla` | Copy of Lab1a's concrete spec (needed for INSTANCE import) |
