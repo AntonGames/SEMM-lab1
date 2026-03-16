@@ -2,3 +2,4 @@ states/
 .tlacache/
 *.log
 *.out
+*.tlc
