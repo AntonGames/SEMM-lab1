@@ -1,4 +1,4 @@
-TLC = java -cp /home/vscode/.vscode-server/extensions/tlaplus.vscode-ide-2026.3.122209/tools/tla2tools.jar tlc2.TLC
+TLC = java -cp $(shell find /home/vscode/.vscode-server/extensions/ -name tla2tools.jar -path '*/tools/*' | head -1) tlc2.TLC
 
 all: check-safety check-liveness check-abstract check-refinement
 

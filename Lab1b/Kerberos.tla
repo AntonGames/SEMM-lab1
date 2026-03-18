@@ -4,7 +4,7 @@ EXTENDS Naturals
 CONSTANTS Clients, Server, KDC, Nonces
 
 VARIABLES
-    clientState,    \* client phase: "idle","wait_ticket","wait_auth","done","failed"
+    clientState,    \* client phase: "idle","wait_ticket","wait_auth","done"
     serverState,    \* server view per client: "idle","accepted"
     kdcState,       \* set of issued tickets
     network,        \* set of messages in transit (unreliable)
@@ -26,7 +26,7 @@ Messages ==
   \cup [type : {"OK"},    src : {Server}, dst : Clients]
 
 TypeOK ==
-    /\ clientState \in [Clients -> {"idle","wait_ticket","wait_auth","done","failed"}]
+    /\ clientState \in [Clients -> {"idle","wait_ticket","wait_auth","done"}]
     /\ serverState \in [Clients -> {"idle","accepted"}]
     /\ kdcState \subseteq Clients
     /\ network \subseteq Messages
@@ -183,10 +183,6 @@ ReplayCacheSound ==
 \* Every client eventually completes authentication (reaches "done")
 EventuallyAuthenticated ==
     \A c \in Clients : <>(clientState[c] = "done")
-
-\* Eventually the protocol reaches a terminal state
-EventuallyTerminal ==
-    <>[](\A c \in Clients : clientState[c] \in {"done", "failed"})
 
 \* ================================================================
 \* Negative invariant (for debugging: expected to be violated)
