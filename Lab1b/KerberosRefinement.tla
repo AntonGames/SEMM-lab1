@@ -11,7 +11,7 @@ vars == <<clientState, serverState, kdcState, network, replayCache, usedNonces>>
 K == INSTANCE Kerberos
 
 \* Local alias for TLC cfg file
-Spec == K!Spec
+Spec == K!SpecLive
 
 \* ================================================================
 \* Refinement mapping: concrete -> abstract
@@ -30,6 +30,7 @@ Abs == INSTANCE KerberosAbstract WITH authState <- authState
 THEOREM Refinement == K!Spec => Abs!Spec
     OMITTED
 
+AbsSpec == Abs!Spec
 \* ================================================================
 \* TLAPS proofs
 \* ================================================================
@@ -152,21 +153,21 @@ THEOREM TypeInvariantLocal == LocalSpec => []TypeOK
         <2>1. SUFFICES ASSUME TypeOK, [Next]_vars PROVE TypeOK'
             OBVIOUS
         <2>2. CASE \E c \in Clients, n \in Nonces : ClientRequest(c, n)
-            BY <2>1, <2>2, SMT DEF TypeOK, ClientRequest, Messages
+            BY <2>1, <2>2 DEF TypeOK, ClientRequest, Messages
         <2>3. CASE \E msg \in network : KDCRespond(msg)
-            BY <2>1, <2>3, SMT DEF TypeOK, KDCRespond, Messages
+            BY <2>1, <2>3 DEF TypeOK, KDCRespond, Messages
         <2>4. CASE \E c \in Clients, msg \in network : ClientAuthenticate(c, msg)
-            BY <2>1, <2>4, SMT DEF TypeOK, ClientAuthenticate, Messages
+            BY <2>1, <2>4 DEF TypeOK, ClientAuthenticate, Messages
         <2>5. CASE \E msg \in network : ServerAccept(msg)
-            BY <2>1, <2>5, SMT DEF TypeOK, ServerAccept, Messages
+            BY <2>1, <2>5 DEF TypeOK, ServerAccept, Messages
         <2>6. CASE \E msg \in network : ServerReject(msg)
-            BY <2>1, <2>6, SMT DEF TypeOK, ServerReject, Messages
+            BY <2>1, <2>6 DEF TypeOK, ServerReject, Messages
         <2>7. CASE \E c \in Clients, msg \in network : ClientReceiveOK(c, msg)
-            BY <2>1, <2>7, SMT DEF TypeOK, ClientReceiveOK, Messages
+            BY <2>1, <2>7 DEF TypeOK, ClientReceiveOK, Messages
         <2>8. CASE \E msg \in network : NetworkLose(msg)
-            BY <2>1, <2>8, SMT DEF TypeOK, NetworkLose
+            BY <2>1, <2>8 DEF TypeOK, NetworkLose
         <2>9. CASE UNCHANGED vars
-            BY <2>1, <2>9, SMT DEF TypeOK, vars
+            BY <2>1, <2>9 DEF TypeOK, vars
         <2>q. QED BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8, <2>9
                   DEF Next
     <1>q. QED BY <1>1, <1>2, PTL DEF LocalSpec
@@ -180,21 +181,21 @@ THEOREM SafetyLocal == LocalSpec => []AcceptRequiresTicket
               PROVE AcceptRequiresTicket'
             OBVIOUS
         <2>2. CASE \E c \in Clients, n \in Nonces : ClientRequest(c, n)
-            BY <2>1, <2>2, SMT DEF AcceptRequiresTicket, ClientRequest
+            BY <2>1, <2>2 DEF AcceptRequiresTicket, ClientRequest
         <2>3. CASE \E msg \in network : KDCRespond(msg)
-            BY <2>1, <2>3, SMT DEF AcceptRequiresTicket, KDCRespond
+            BY <2>1, <2>3 DEF AcceptRequiresTicket, KDCRespond
         <2>4. CASE \E c \in Clients, msg \in network : ClientAuthenticate(c, msg)
-            BY <2>1, <2>4, SMT DEF AcceptRequiresTicket, ClientAuthenticate
+            BY <2>1, <2>4 DEF AcceptRequiresTicket, ClientAuthenticate
         <2>5. CASE \E msg \in network : ServerAccept(msg)
-            BY <2>1, <2>5, SMT DEF AcceptRequiresTicket, TypeOK, ServerAccept
+            BY <2>1, <2>5 DEF AcceptRequiresTicket, TypeOK, ServerAccept
         <2>6. CASE \E msg \in network : ServerReject(msg)
-            BY <2>1, <2>6, SMT DEF AcceptRequiresTicket, ServerReject
+            BY <2>1, <2>6 DEF AcceptRequiresTicket, ServerReject
         <2>7. CASE \E c \in Clients, msg \in network : ClientReceiveOK(c, msg)
-            BY <2>1, <2>7, SMT DEF AcceptRequiresTicket, ClientReceiveOK
+            BY <2>1, <2>7 DEF AcceptRequiresTicket, ClientReceiveOK
         <2>8. CASE \E msg \in network : NetworkLose(msg)
-            BY <2>1, <2>8, SMT DEF AcceptRequiresTicket, NetworkLose
+            BY <2>1, <2>8 DEF AcceptRequiresTicket, NetworkLose
         <2>9. CASE UNCHANGED vars
-            BY <2>1, <2>9, SMT DEF AcceptRequiresTicket, vars
+            BY <2>1, <2>9 DEF AcceptRequiresTicket, vars
         <2>q. QED BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8, <2>9
                   DEF Next
     <1>q. QED BY <1>1, <1>2, TypeInvariantLocal, PTL DEF LocalSpec
